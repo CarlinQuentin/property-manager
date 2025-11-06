@@ -1,0 +1,12 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+.pm-btn {
+  @apply rounded-lg border border-slate-300 bg-white px-3 py-2 font-semibold hover:bg-slate-50 active:scale-[.99];
+}
+.pm-card {
+  @apply bg-white border border-slate-200 rounded-xl p-4 shadow-sm;
+}
+.pm-input {
+  @apply rounded-lg border border-slate-300 px-3 py-2 bg-white;
+}
