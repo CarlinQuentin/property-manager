@@ -106,18 +106,24 @@ export default function Tenants() {
       {/* Add Tenant Form */}
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <input
+          id="tenant-first-name"
+          data-testid="tenant-first-name"
           className="pm-input"
           placeholder="First Name"
           value={form.first_name ?? ""}
           onChange={(e) => setForm({ ...form, first_name: e.target.value })}
         />
         <input
+          id="tenant-last-name"
+          data-testid="tenant-last-name"
           className="pm-input"
           placeholder="Last Name"
           value={form.last_name ?? ""}
           onChange={(e) => setForm({ ...form, last_name: e.target.value })}
         />
         <input
+          id="tenant-email"
+          data-testid="tenant-email"
           className="pm-input"
           placeholder="Email"
           type="email"
@@ -125,6 +131,8 @@ export default function Tenants() {
           onChange={(e) => setForm({ ...form, email: e.target.value })}
         />
         <input
+          id="tenant-phone"
+          data-testid="tenant-phone"
           className="pm-input"
           placeholder="Phone"
           value={form.phone ?? ""}
@@ -200,18 +208,24 @@ export default function Tenants() {
             <h2 className="text-lg font-semibold mb-3">Edit Tenant</h2>
             <div className="grid gap-2 sm:grid-cols-2">
               <input
+                id="edit-tenant-first-name"
+                data-testid="edit-tenant-first-name"
                 className="pm-input"
                 placeholder="First Name"
                 value={editing.first_name ?? ""}
                 onChange={(e) => setEditing({ ...editing, first_name: e.target.value })}
               />
               <input
+                id="edit-tenant-last-name"
+                data-testid="edit-tenant-last-name"
                 className="pm-input"
                 placeholder="Last Name"
                 value={editing.last_name ?? ""}
                 onChange={(e) => setEditing({ ...editing, last_name: e.target.value })}
               />
               <input
+                id="edit-tenant-email"
+                data-testid="edit-tenant-email"
                 className="pm-input"
                 placeholder="Email"
                 type="email"
@@ -219,6 +233,8 @@ export default function Tenants() {
                 onChange={(e) => setEditing({ ...editing, email: e.target.value })}
               />
               <input
+                id="edit-tenant-phone"
+                data-testid="edit-tenant-phone"
                 className="pm-input"
                 placeholder="Phone"
                 value={editing.phone ?? ""}

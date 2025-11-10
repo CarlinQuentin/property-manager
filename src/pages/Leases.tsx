@@ -190,6 +190,8 @@ export default function Leases() {
       <div className="pm-card space-y-3">
         <div className="grid gap-2 sm:grid-cols-3">
           <select
+            id="lease-property"
+            data-testid="lease-property"
             className="pm-input"
             value={form.property_id ?? ""}
             onChange={(e) => setForm({ ...form, property_id: e.target.value })}
@@ -203,6 +205,8 @@ export default function Leases() {
           </select>
 
           <select
+            id="lease-unit"
+            data-testid="lease-unit"
             className="pm-input"
             value={form.unit_id ?? ""}
             onChange={(e) => setForm({ ...form, unit_id: e.target.value })}
@@ -217,6 +221,8 @@ export default function Leases() {
           </select>
 
           <select
+            id="lease-tenant"
+            data-testid="lease-tenant"
             className="pm-input"
             value={form.tenant_id ?? ""}
             onChange={(e) => setForm({ ...form, tenant_id: e.target.value })}
@@ -232,6 +238,8 @@ export default function Leases() {
 
         <div className="grid gap-2 sm:grid-cols-4">
           <input
+            id="lease-start"
+            data-testid="lease-start"
             className="pm-input"
             type="date"
             value={form.start_date ?? ""}
@@ -239,6 +247,8 @@ export default function Leases() {
             placeholder="Start date"
           />
           <input
+            id="lease-end"
+            data-testid="lease-end"
             className="pm-input"
             type="date"
             value={form.end_date ?? ""}
@@ -246,6 +256,8 @@ export default function Leases() {
             placeholder="End date (optional)"
           />
           <input
+            id="lease-rent"
+            data-testid="lease-rent"
             className="pm-input"
             type="number"
             inputMode="decimal"
@@ -254,6 +266,8 @@ export default function Leases() {
             onChange={(e) => setForm({ ...form, rent_dollars: e.target.value })}
           />
           <input
+            id="lease-due"
+            data-testid="lease-due"
             className="pm-input"
             type="number"
             min={1}
@@ -266,6 +280,8 @@ export default function Leases() {
 
         <div className="grid gap-2 sm:grid-cols-2">
           <input
+            id="lease-deposit"
+            data-testid="lease-deposit"
             className="pm-input"
             type="number"
             inputMode="decimal"
@@ -274,6 +290,8 @@ export default function Leases() {
             onChange={(e) => setForm({ ...form, deposit_dollars: e.target.value })}
           />
           <select
+            id="lease-status"
+            data-testid="lease-status"
             className="pm-input"
             value={form.status ?? "active"}
             onChange={(e) => setForm({ ...form, status: e.target.value as Lease["status"] })}
@@ -286,6 +304,7 @@ export default function Leases() {
           </select>
         </div>
       </div>
+
 
       {/* List */}
       <div className="pm-card overflow-auto">
@@ -361,16 +380,16 @@ export default function Leases() {
           </table>
         )}
       </div>
-
-      {/* Edit modal */}
       {editing && (
         <div className="fixed inset-0 z-20 grid place-items-center bg-black/40" onClick={() => setEditing(null)}>
           <div className="pm-card w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-semibold mb-3">Edit Lease</h2>
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
-                <label className="text-xs text-slate-500">Start</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-lease-start">Start</label>
                 <input
+                  id="edit-lease-start"
+                  data-testid="edit-lease-start"
                   className="pm-input"
                   type="date"
                   value={editing.start_date}
@@ -378,8 +397,10 @@ export default function Leases() {
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500">End</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-lease-end">End</label>
                 <input
+                  id="edit-lease-end"
+                  data-testid="edit-lease-end"
                   className="pm-input"
                   type="date"
                   value={editing.end_date ?? ""}
@@ -387,8 +408,10 @@ export default function Leases() {
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500">Rent (USD)</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-lease-rent">Rent (USD)</label>
                 <input
+                  id="edit-lease-rent"
+                  data-testid="edit-lease-rent"
                   className="pm-input"
                   type="number"
                   inputMode="decimal"
@@ -399,8 +422,10 @@ export default function Leases() {
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500">Due day (1–28)</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-lease-due">Due day (1–28)</label>
                 <input
+                  id="edit-lease-due"
+                  data-testid="edit-lease-due"
                   className="pm-input"
                   type="number"
                   min={1}
@@ -410,8 +435,10 @@ export default function Leases() {
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500">Deposit (USD)</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-lease-deposit">Deposit (USD)</label>
                 <input
+                  id="edit-lease-deposit"
+                  data-testid="edit-lease-deposit"
                   className="pm-input"
                   type="number"
                   inputMode="decimal"
@@ -419,15 +446,16 @@ export default function Leases() {
                   onChange={(e) =>
                     setEditing({
                       ...editing,
-                      deposit_cents:
-                        e.target.value.trim() === "" ? null : Math.round(Number(e.target.value) * 100),
+                      deposit_cents: e.target.value.trim() === "" ? null : Math.round(Number(e.target.value) * 100),
                     })
                   }
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500">Status</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-lease-status">Status</label>
                 <select
+                  id="edit-lease-status"
+                  data-testid="edit-lease-status"
                   className="pm-input"
                   value={editing.status}
                   onChange={(e) => setEditing({ ...editing, status: e.target.value as Lease["status"] })}
@@ -442,10 +470,10 @@ export default function Leases() {
             </div>
 
             <div className="mt-4 flex justify-end gap-2">
-              <button className="pm-btn" onClick={saveEdit} disabled={savingEdit}>
+              <button className="pm-btn" data-testid="edit-lease-save" onClick={saveEdit} disabled={savingEdit}>
                 {savingEdit ? "Saving..." : "Save"}
               </button>
-              <button className="px-3 py-2 rounded border" onClick={() => setEditing(null)}>
+              <button className="px-3 py-2 rounded border" data-testid="edit-lease-cancel" onClick={() => setEditing(null)}>
                 Cancel
               </button>
             </div>

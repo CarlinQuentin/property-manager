@@ -130,38 +130,50 @@ export default function Properties() {
       {/* Add form */}
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
         <input
+          id="property-name"
+          data-testid="property-name"
           className="pm-input"
           placeholder="Name"
           value={form.name ?? ""}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
         />
         <input
+          id="property-address"
+          data-testid="property-address"
           className="pm-input"
           placeholder="Address"
           value={form.address1 ?? ""}
           onChange={(e) => setForm({ ...form, address1: e.target.value })}
         />
         <input
+          id="property-city"
+          data-testid="property-city"
           className="pm-input"
           placeholder="City"
           value={form.city ?? ""}
           onChange={(e) => setForm({ ...form, city: e.target.value })}
         />
         <input
+          id="property-state"
+          data-testid="property-state"
           className="pm-input"
           placeholder="State"
           value={form.state ?? ""}
           onChange={(e) => setForm({ ...form, state: e.target.value })}
         />
         <input
+          id="property-postal"
+          data-testid="property-postal"
           className="pm-input"
           placeholder="Postal Code"
           value={form.postal_code ?? ""}
           onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
         />
         <div className="flex items-center gap-3">
-          <label className="text-sm text-slate-700">Property type:</label>
+          <label className="text-sm text-slate-700" htmlFor="property-type">Property type:</label>
           <select
+            id="property-type"
+            data-testid="property-type"
             className="pm-input"
             value={form.property_type ?? "single"}
             onChange={(e) => setForm({ ...form, property_type: e.target.value as "single" | "multi" })}
@@ -255,12 +267,16 @@ export default function Properties() {
             <h2 className="text-lg font-semibold mb-3">Edit Property</h2>
             <div className="grid gap-2 sm:grid-cols-2">
               <input
+                id="edit-property-name"
+                data-testid="edit-property-name"
                 className="pm-input"
                 placeholder="Name"
                 value={editing.name ?? ""}
                 onChange={(e) => setEditing({ ...editing, name: e.target.value })}
               />
               <select
+                id="edit-property-type"
+                data-testid="edit-property-type"
                 className="pm-input"
                 value={(editing as any).property_type ?? "single"}
                 onChange={(e) =>
@@ -271,24 +287,32 @@ export default function Properties() {
                 <option value="multi">Multi-unit</option>
               </select>
               <input
+                id="edit-property-address"
+                data-testid="edit-property-address"
                 className="pm-input"
                 placeholder="Address"
                 value={editing.address1 ?? ""}
                 onChange={(e) => setEditing({ ...editing, address1: e.target.value })}
               />
               <input
+                id="edit-property-city"
+                data-testid="edit-property-city"
                 className="pm-input"
                 placeholder="City"
                 value={editing.city ?? ""}
                 onChange={(e) => setEditing({ ...editing, city: e.target.value })}
               />
               <input
+                id="edit-property-state"
+                data-testid="edit-property-state"
                 className="pm-input"
                 placeholder="State"
                 value={editing.state ?? ""}
                 onChange={(e) => setEditing({ ...editing, state: e.target.value })}
               />
               <input
+                id="edit-property-postal"
+                data-testid="edit-property-postal"
                 className="pm-input"
                 placeholder="Postal Code"
                 value={editing.postal_code ?? ""}

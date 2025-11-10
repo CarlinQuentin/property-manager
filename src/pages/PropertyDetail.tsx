@@ -149,12 +149,16 @@ export default function PropertyDetail() {
 
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           <input
+            id="unit-label"
+            data-testid="unit-label"
             className="pm-input"
             placeholder='Label (e.g., "Single Family Home", "Unit A")'
             value={form.label ?? ""}
             onChange={(e) => setForm({ ...form, label: e.target.value })}
           />
           <input
+            id="unit-bedrooms"
+            data-testid="unit-bedrooms"
             className="pm-input"
             type="number"
             placeholder="Bedrooms"
@@ -162,6 +166,8 @@ export default function PropertyDetail() {
             onChange={(e) => setForm({ ...form, bedrooms: e.target.value ? Number(e.target.value) : undefined })}
           />
           <input
+            id="unit-bathrooms"
+            data-testid="unit-bathrooms"
             className="pm-input"
             type="number"
             step="0.5"
@@ -170,6 +176,8 @@ export default function PropertyDetail() {
             onChange={(e) => setForm({ ...form, bathrooms: e.target.value ? Number(e.target.value) : undefined })}
           />
           <input
+            id="unit-sqft"
+            data-testid="unit-sqft"
             className="pm-input"
             type="number"
             placeholder="Sq Ft"
@@ -179,8 +187,10 @@ export default function PropertyDetail() {
         </div>
 
         <div className="mt-3">
-          <label className="inline-flex items-center gap-2 text-sm">
+          <label className="inline-flex items-center gap-2 text-sm" htmlFor="unit-default">
             <input
+              id="unit-default"
+              data-testid="unit-default"
               type="checkbox"
               checked={Boolean(form.is_default)}
               onChange={(e) => setForm({ ...form, is_default: e.target.checked })}
@@ -264,13 +274,17 @@ export default function PropertyDetail() {
             <h2 className="text-lg font-semibold mb-3">Edit Unit</h2>
             <div className="grid gap-2 sm:grid-cols-2">
               <input
+                id="edit-unit-label"
+                data-testid="edit-unit-label"
                 className="pm-input"
                 placeholder="Label"
                 value={editing.label ?? ""}
                 onChange={(e) => setEditing({ ...editing, label: e.target.value })}
               />
-              <label className="inline-flex items-center gap-2 px-2">
+              <label className="inline-flex items-center gap-2 px-2" htmlFor="edit-unit-default">
                 <input
+                  id="edit-unit-default"
+                  data-testid="edit-unit-default"
                   type="checkbox"
                   checked={Boolean(editing.is_default)}
                   onChange={(e) => setEditing({ ...editing, is_default: e.target.checked })}
@@ -278,6 +292,8 @@ export default function PropertyDetail() {
                 Default unit
               </label>
               <input
+                id="edit-unit-bedrooms"
+                data-testid="edit-unit-bedrooms"
                 className="pm-input"
                 type="number"
                 placeholder="Bedrooms"
@@ -285,6 +301,8 @@ export default function PropertyDetail() {
                 onChange={(e) => setEditing({ ...editing, bedrooms: e.target.value ? Number(e.target.value) : null })}
               />
               <input
+                id="edit-unit-bathrooms"
+                data-testid="edit-unit-bathrooms"
                 className="pm-input"
                 type="number"
                 step="0.5"
@@ -293,6 +311,8 @@ export default function PropertyDetail() {
                 onChange={(e) => setEditing({ ...editing, bathrooms: e.target.value ? Number(e.target.value) : null })}
               />
               <input
+                id="edit-unit-sqft"
+                data-testid="edit-unit-sqft"
                 className="pm-input"
                 type="number"
                 placeholder="Sq Ft"

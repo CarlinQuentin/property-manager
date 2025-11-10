@@ -140,6 +140,8 @@ export default function Payments() {
       <div className="pm-card space-y-3">
         <div className="grid gap-2 sm:grid-cols-4">
           <select
+            id="payment-lease"
+            data-testid="payment-lease"
             className="pm-input"
             value={form.lease_id ?? ""}
             onChange={(e) => setForm({ ...form, lease_id: e.target.value })}
@@ -147,13 +149,15 @@ export default function Payments() {
             <option value="">Select lease…</option>
             {leases.map((l) => (
               <option key={l.id} value={l.id}>
-                {l.unit?.property?.name ?? "Property"} • {l.unit?.label ?? "Unit"} — {l.tenant?.first_name}{" "}
+                {l.unit?.property?.name ?? "Property"} • {l.unit?.label ?? "Unit"} — {l.tenant?.first_name} {" "}
                 {l.tenant?.last_name}
               </option>
             ))}
           </select>
 
           <input
+            id="payment-date"
+            data-testid="payment-date"
             className="pm-input"
             type="date"
             value={form.paid_on}
@@ -161,6 +165,8 @@ export default function Payments() {
           />
 
           <input
+            id="payment-amount"
+            data-testid="payment-amount"
             className="pm-input"
             type="number"
             inputMode="decimal"
@@ -170,6 +176,8 @@ export default function Payments() {
           />
 
           <select
+            id="payment-method"
+            data-testid="payment-method"
             className="pm-input"
             value={form.method}
             onChange={(e) => setForm({ ...form, method: e.target.value as Payment["method"] })}
@@ -183,6 +191,8 @@ export default function Payments() {
         </div>
 
         <input
+          id="payment-memo"
+          data-testid="payment-memo"
           className="pm-input w-full"
           placeholder="Memo (optional)"
           value={form.memo ?? ""}
@@ -266,8 +276,10 @@ export default function Payments() {
             <h2 className="text-lg font-semibold mb-3">Edit Payment</h2>
             <div className="grid gap-2 sm:grid-cols-2">
               <div>
-                <label className="text-xs text-slate-500">Date</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-payment-date">Date</label>
                 <input
+                  id="edit-payment-date"
+                  data-testid="edit-payment-date"
                   className="pm-input"
                   type="date"
                   value={editing.paid_on}
@@ -275,8 +287,10 @@ export default function Payments() {
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500">Amount (USD)</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-payment-amount">Amount (USD)</label>
                 <input
+                  id="edit-payment-amount"
+                  data-testid="edit-payment-amount"
                   className="pm-input"
                   type="number"
                   inputMode="decimal"
@@ -290,8 +304,10 @@ export default function Payments() {
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500">Method</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-payment-method">Method</label>
                 <select
+                  id="edit-payment-method"
+                  data-testid="edit-payment-method"
                   className="pm-input"
                   value={editing.method}
                   onChange={(e) => setEditing({ ...editing, method: e.target.value as Payment["method"] })}
@@ -304,8 +320,10 @@ export default function Payments() {
                 </select>
               </div>
               <div>
-                <label className="text-xs text-slate-500">Memo</label>
+                <label className="text-xs text-slate-500" htmlFor="edit-payment-memo">Memo</label>
                 <input
+                  id="edit-payment-memo"
+                  data-testid="edit-payment-memo"
                   className="pm-input"
                   value={editing.memo ?? ""}
                   onChange={(e) => setEditing({ ...editing, memo: e.target.value })}
@@ -314,10 +332,10 @@ export default function Payments() {
             </div>
 
             <div className="mt-4 flex justify-end gap-2">
-              <button className="pm-btn" onClick={saveEdit} disabled={savingEdit}>
+              <button className="pm-btn" data-testid="edit-payment-save" onClick={saveEdit} disabled={savingEdit}>
                 {savingEdit ? "Saving..." : "Save"}
               </button>
-              <button className="px-3 py-2 rounded border" onClick={() => setEditing(null)}>
+              <button className="px-3 py-2 rounded border" data-testid="edit-payment-cancel" onClick={() => setEditing(null)}>
                 Cancel
               </button>
             </div>
