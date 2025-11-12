@@ -22,7 +22,10 @@ export default function Leases() {
   // list + form
   const [leases, setLeases] = useState<LeaseRow[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+
+  // Modal state for add lease
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [savingAdd, setSavingAdd] = useState(false);
 
   // row menu + edit modal
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
@@ -96,7 +99,7 @@ export default function Leases() {
   async function addLease() {
     if (!canSave) return;
     try {
-      setSaving(true);
+      setSavingAdd(true);
       const rent_cents = Math.round(Number(form.rent_dollars) * 100);
       const deposit_cents =
         form.deposit_dollars && form.deposit_dollars.trim() !== ""
@@ -116,10 +119,11 @@ export default function Leases() {
 
       setLeases((prev) => [newLease, ...prev]);
       setForm((f) => ({ property_id: f.property_id, unit_id: f.unit_id, status: "active", due_day: 1 }));
+      setAddModalOpen(false);
     } catch (e) {
       console.error("Failed to add lease:", e);
     } finally {
-      setSaving(false);
+      setSavingAdd(false);
     }
   }
 
@@ -181,129 +185,151 @@ export default function Leases() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Leases</h1>
-        <button className="pm-btn" onClick={addLease} disabled={!canSave || saving}>
-          {saving ? "Saving..." : "+ Add Lease"}
+        <button className="pm-btn" onClick={() => setAddModalOpen(true)}>
+          + Add Lease
         </button>
       </div>
 
-      {/* Form */}
-      <div className="pm-card space-y-3">
-        <div className="grid gap-2 sm:grid-cols-3">
-          <select
-            id="lease-property"
-            data-testid="lease-property"
-            className="pm-input"
-            value={form.property_id ?? ""}
-            onChange={(e) => setForm({ ...form, property_id: e.target.value })}
-          >
-            <option value="">Select property…</option>
-            {properties.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
+      {/* Add Lease Modal */}
+      {addModalOpen && (
+        <div className="fixed inset-0 z-20 grid place-items-center bg-black/40" onClick={() => setAddModalOpen(false)}>
+          <div className="pm-card w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold mb-3">Add Lease</h2>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <select
+                id="add-lease-property"
+                data-testid="add-lease-property"
+                className="pm-input"
+                value={form.property_id ?? ""}
+                onChange={(e) => setForm({ ...form, property_id: e.target.value })}
+              >
+                <option value="">Select property…</option>
+                {properties.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
 
-          <select
-            id="lease-unit"
-            data-testid="lease-unit"
-            className="pm-input"
-            value={form.unit_id ?? ""}
-            onChange={(e) => setForm({ ...form, unit_id: e.target.value })}
-            disabled={!form.property_id}
-          >
-            <option value="">{form.property_id ? "Select unit…" : "Pick a property first"}</option>
-            {units.map((u) => (
-              <option key={u.id} value={u.id}>
-                {u.label}
-              </option>
-            ))}
-          </select>
+              <select
+                id="add-lease-unit"
+                data-testid="add-lease-unit"
+                className="pm-input"
+                value={form.unit_id ?? ""}
+                onChange={(e) => setForm({ ...form, unit_id: e.target.value })}
+                disabled={!form.property_id}
+              >
+                <option value="">{form.property_id ? "Select unit…" : "Pick a property first"}</option>
+                {units.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.label}
+                  </option>
+                ))}
+              </select>
 
-          <select
-            id="lease-tenant"
-            data-testid="lease-tenant"
-            className="pm-input"
-            value={form.tenant_id ?? ""}
-            onChange={(e) => setForm({ ...form, tenant_id: e.target.value })}
-          >
-            <option value="">Select tenant…</option>
-            {tenants.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.first_name} {t.last_name}
-              </option>
-            ))}
-          </select>
+              <select
+                id="add-lease-tenant"
+                data-testid="add-lease-tenant"
+                className="pm-input"
+                value={form.tenant_id ?? ""}
+                onChange={(e) => setForm({ ...form, tenant_id: e.target.value })}
+              >
+                <option value="">Select tenant…</option>
+                {tenants.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.first_name} {t.last_name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-4">
+              <input
+                id="add-lease-start"
+                data-testid="add-lease-start"
+                className="pm-input"
+                type="date"
+                value={form.start_date ?? ""}
+                onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+                placeholder="Start date"
+              />
+              <input
+                id="add-lease-end"
+                data-testid="add-lease-end"
+                className="pm-input"
+                type="date"
+                value={form.end_date ?? ""}
+                onChange={(e) => setForm({ ...form, end_date: e.target.value })}
+                placeholder="End date (optional)"
+              />
+              <input
+                id="add-lease-rent"
+                data-testid="add-lease-rent"
+                className="pm-input"
+                type="number"
+                inputMode="decimal"
+                placeholder="Rent (dollars)"
+                value={form.rent_dollars ?? ""}
+                onChange={(e) => setForm({ ...form, rent_dollars: e.target.value })}
+              />
+              <input
+                id="add-lease-due"
+                data-testid="add-lease-due"
+                className="pm-input"
+                type="number"
+                min={1}
+                max={28}
+                placeholder="Due day"
+                value={form.due_day ?? 1}
+                onChange={(e) => setForm({ ...form, due_day: Number(e.target.value) })}
+              />
+            </div>
+
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                id="add-lease-deposit"
+                data-testid="add-lease-deposit"
+                className="pm-input"
+                type="number"
+                inputMode="decimal"
+                placeholder="Deposit (dollars, optional)"
+                value={form.deposit_dollars ?? ""}
+                onChange={(e) => setForm({ ...form, deposit_dollars: e.target.value })}
+              />
+              <select
+                id="add-lease-status"
+                data-testid="add-lease-status"
+                className="pm-input"
+                value={form.status ?? "active"}
+                onChange={(e) => setForm({ ...form, status: e.target.value as Lease["status"] })}
+              >
+                {(["pending", "active", "ended", "defaulted"] as const).map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="pm-btn"
+                data-testid="add-lease-save"
+                onClick={addLease}
+                disabled={savingAdd || !canSave}
+              >
+                {savingAdd ? "Saving..." : "Save"}
+              </button>
+              <button
+                className="px-3 py-2 rounded border"
+                data-testid="add-lease-cancel"
+                onClick={() => { setAddModalOpen(false); setForm({ status: "active", due_day: 1 }); }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
-
-        <div className="grid gap-2 sm:grid-cols-4">
-          <input
-            id="lease-start"
-            data-testid="lease-start"
-            className="pm-input"
-            type="date"
-            value={form.start_date ?? ""}
-            onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-            placeholder="Start date"
-          />
-          <input
-            id="lease-end"
-            data-testid="lease-end"
-            className="pm-input"
-            type="date"
-            value={form.end_date ?? ""}
-            onChange={(e) => setForm({ ...form, end_date: e.target.value })}
-            placeholder="End date (optional)"
-          />
-          <input
-            id="lease-rent"
-            data-testid="lease-rent"
-            className="pm-input"
-            type="number"
-            inputMode="decimal"
-            placeholder="Rent (dollars)"
-            value={form.rent_dollars ?? ""}
-            onChange={(e) => setForm({ ...form, rent_dollars: e.target.value })}
-          />
-          <input
-            id="lease-due"
-            data-testid="lease-due"
-            className="pm-input"
-            type="number"
-            min={1}
-            max={28}
-            placeholder="Due day"
-            value={form.due_day ?? 1}
-            onChange={(e) => setForm({ ...form, due_day: Number(e.target.value) })}
-          />
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-2">
-          <input
-            id="lease-deposit"
-            data-testid="lease-deposit"
-            className="pm-input"
-            type="number"
-            inputMode="decimal"
-            placeholder="Deposit (dollars, optional)"
-            value={form.deposit_dollars ?? ""}
-            onChange={(e) => setForm({ ...form, deposit_dollars: e.target.value })}
-          />
-          <select
-            id="lease-status"
-            data-testid="lease-status"
-            className="pm-input"
-            value={form.status ?? "active"}
-            onChange={(e) => setForm({ ...form, status: e.target.value as Lease["status"] })}
-          >
-            {(["pending", "active", "ended", "defaulted"] as const).map((s) => (
-              <option key={s} value={s}>
-                {s}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      )}
 
 
       {/* List */}
@@ -382,93 +408,81 @@ export default function Leases() {
       </div>
       {editing && (
         <div className="fixed inset-0 z-20 grid place-items-center bg-black/40" onClick={() => setEditing(null)}>
-          <div className="pm-card w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+          <div className="pm-card w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-semibold mb-3">Edit Lease</h2>
-            <div className="grid gap-2 sm:grid-cols-2">
-              <div>
-                <label className="text-xs text-slate-500" htmlFor="edit-lease-start">Start</label>
-                <input
-                  id="edit-lease-start"
-                  data-testid="edit-lease-start"
-                  className="pm-input"
-                  type="date"
-                  value={editing.start_date}
-                  onChange={(e) => setEditing({ ...editing, start_date: e.target.value })}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500" htmlFor="edit-lease-end">End</label>
-                <input
-                  id="edit-lease-end"
-                  data-testid="edit-lease-end"
-                  className="pm-input"
-                  type="date"
-                  value={editing.end_date ?? ""}
-                  onChange={(e) => setEditing({ ...editing, end_date: e.target.value || null })}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500" htmlFor="edit-lease-rent">Rent (USD)</label>
-                <input
-                  id="edit-lease-rent"
-                  data-testid="edit-lease-rent"
-                  className="pm-input"
-                  type="number"
-                  inputMode="decimal"
-                  value={(editing.rent_cents / 100).toString()}
-                  onChange={(e) =>
-                    setEditing({ ...editing, rent_cents: Math.round(Number(e.target.value || 0) * 100) })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500" htmlFor="edit-lease-due">Due day (1–28)</label>
-                <input
-                  id="edit-lease-due"
-                  data-testid="edit-lease-due"
-                  className="pm-input"
-                  type="number"
-                  min={1}
-                  max={28}
-                  value={editing.due_day}
-                  onChange={(e) => setEditing({ ...editing, due_day: Number(e.target.value) })}
-                />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500" htmlFor="edit-lease-deposit">Deposit (USD)</label>
-                <input
-                  id="edit-lease-deposit"
-                  data-testid="edit-lease-deposit"
-                  className="pm-input"
-                  type="number"
-                  inputMode="decimal"
-                  value={((editing.deposit_cents ?? 0) / 100).toString()}
-                  onChange={(e) =>
-                    setEditing({
-                      ...editing,
-                      deposit_cents: e.target.value.trim() === "" ? null : Math.round(Number(e.target.value) * 100),
-                    })
-                  }
-                />
-              </div>
-              <div>
-                <label className="text-xs text-slate-500" htmlFor="edit-lease-status">Status</label>
-                <select
-                  id="edit-lease-status"
-                  data-testid="edit-lease-status"
-                  className="pm-input"
-                  value={editing.status}
-                  onChange={(e) => setEditing({ ...editing, status: e.target.value as Lease["status"] })}
-                >
-                  {(["pending", "active", "ended", "defaulted"] as const).map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="grid gap-2 sm:grid-cols-3">
+              <input
+                id="edit-lease-start"
+                data-testid="edit-lease-start"
+                className="pm-input"
+                type="date"
+                placeholder="Start date"
+                value={editing.start_date}
+                onChange={(e) => setEditing({ ...editing, start_date: e.target.value })}
+              />
+              <input
+                id="edit-lease-end"
+                data-testid="edit-lease-end"
+                className="pm-input"
+                type="date"
+                placeholder="End date (optional)"
+                value={editing.end_date ?? ""}
+                onChange={(e) => setEditing({ ...editing, end_date: e.target.value || null })}
+              />
+              <input
+                id="edit-lease-rent"
+                data-testid="edit-lease-rent"
+                className="pm-input"
+                type="number"
+                inputMode="decimal"
+                placeholder="Rent (dollars)"
+                value={(editing.rent_cents / 100).toString()}
+                onChange={(e) =>
+                  setEditing({ ...editing, rent_cents: Math.round(Number(e.target.value || 0) * 100) })
+                }
+              />
             </div>
-
+            <div className="grid gap-2 sm:grid-cols-4 mt-2">
+              <input
+                id="edit-lease-due"
+                data-testid="edit-lease-due"
+                className="pm-input"
+                type="number"
+                min={1}
+                max={28}
+                placeholder="Due day"
+                value={editing.due_day}
+                onChange={(e) => setEditing({ ...editing, due_day: Number(e.target.value) })}
+              />
+              <input
+                id="edit-lease-deposit"
+                data-testid="edit-lease-deposit"
+                className="pm-input"
+                type="number"
+                inputMode="decimal"
+                placeholder="Deposit (dollars, optional)"
+                value={((editing.deposit_cents ?? 0) / 100).toString()}
+                onChange={(e) =>
+                  setEditing({
+                    ...editing,
+                    deposit_cents: e.target.value.trim() === "" ? null : Math.round(Number(e.target.value) * 100),
+                  })
+                }
+              />
+              <select
+                id="edit-lease-status"
+                data-testid="edit-lease-status"
+                className="pm-input"
+                value={editing.status}
+                onChange={(e) => setEditing({ ...editing, status: e.target.value as Lease["status"] })}
+              >
+                {(["pending", "active", "ended", "defaulted"] as const).map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
             <div className="mt-4 flex justify-end gap-2">
               <button className="pm-btn" data-testid="edit-lease-save" onClick={saveEdit} disabled={savingEdit}>
                 {savingEdit ? "Saving..." : "Save"}

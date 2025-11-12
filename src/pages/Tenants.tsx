@@ -10,6 +10,10 @@ export default function Tenants() {
   const [form, setForm] = useState<Partial<Tenant>>({});
   const [loading, setLoading] = useState(false);
 
+  // Modal state for add tenant
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [savingAdd, setSavingAdd] = useState(false);
+
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [editing, setEditing] = useState<EditState>(null);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -33,6 +37,7 @@ export default function Tenants() {
   async function addTenant() {
     if (!form.first_name || !form.last_name) return;
     try {
+      setSavingAdd(true);
       const newTenant = await createTenant({
         first_name: form.first_name,
         last_name: form.last_name,
@@ -41,8 +46,11 @@ export default function Tenants() {
       });
       setTenants((prev) => [newTenant, ...prev]);
       setForm({});
+      setAddModalOpen(false);
     } catch (error) {
       console.error("Error adding tenant:", error);
+    } finally {
+      setSavingAdd(false);
     }
   }
 
@@ -98,47 +106,71 @@ export default function Tenants() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Tenants</h1>
-        <button className="pm-btn" onClick={addTenant}>
+        <button className="pm-btn" onClick={() => setAddModalOpen(true)}>
           + Add Tenant
         </button>
       </div>
 
-      {/* Add Tenant Form */}
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <input
-          id="tenant-first-name"
-          data-testid="tenant-first-name"
-          className="pm-input"
-          placeholder="First Name"
-          value={form.first_name ?? ""}
-          onChange={(e) => setForm({ ...form, first_name: e.target.value })}
-        />
-        <input
-          id="tenant-last-name"
-          data-testid="tenant-last-name"
-          className="pm-input"
-          placeholder="Last Name"
-          value={form.last_name ?? ""}
-          onChange={(e) => setForm({ ...form, last_name: e.target.value })}
-        />
-        <input
-          id="tenant-email"
-          data-testid="tenant-email"
-          className="pm-input"
-          placeholder="Email"
-          type="email"
-          value={form.email ?? ""}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          id="tenant-phone"
-          data-testid="tenant-phone"
-          className="pm-input"
-          placeholder="Phone"
-          value={form.phone ?? ""}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
-      </div>
+      {/* Add Tenant Modal */}
+      {addModalOpen && (
+        <div className="fixed inset-0 z-20 grid place-items-center bg-black/40" onClick={() => setAddModalOpen(false)}>
+          <div className="pm-card w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold mb-3">Add Tenant</h2>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                id="add-tenant-first-name"
+                data-testid="add-tenant-first-name"
+                className="pm-input"
+                placeholder="First Name"
+                value={form.first_name ?? ""}
+                onChange={(e) => setForm({ ...form, first_name: e.target.value })}
+              />
+              <input
+                id="add-tenant-last-name"
+                data-testid="add-tenant-last-name"
+                className="pm-input"
+                placeholder="Last Name"
+                value={form.last_name ?? ""}
+                onChange={(e) => setForm({ ...form, last_name: e.target.value })}
+              />
+              <input
+                id="add-tenant-email"
+                data-testid="add-tenant-email"
+                className="pm-input"
+                placeholder="Email"
+                type="email"
+                value={form.email ?? ""}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+              <input
+                id="add-tenant-phone"
+                data-testid="add-tenant-phone"
+                className="pm-input"
+                placeholder="Phone"
+                value={form.phone ?? ""}
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="pm-btn"
+                data-testid="add-tenant-save"
+                onClick={addTenant}
+                disabled={savingAdd || !form.first_name?.trim() || !form.last_name?.trim()}
+              >
+                {savingAdd ? "Saving..." : "Save"}
+              </button>
+              <button
+                className="px-3 py-2 rounded border"
+                data-testid="add-tenant-cancel"
+                onClick={() => { setAddModalOpen(false); setForm({}); }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Table */}
       <div className="pm-card overflow-auto">

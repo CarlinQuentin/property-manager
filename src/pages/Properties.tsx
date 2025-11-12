@@ -17,6 +17,11 @@ export default function Properties() {
     property_type: "single",
   });
   const [loading, setLoading] = useState(false);
+
+  // Modal state for add property
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [savingAdd, setSavingAdd] = useState(false);
+
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [editing, setEditing] = useState<EditState>(null);
   const [savingEdit, setSavingEdit] = useState(false);
@@ -43,6 +48,7 @@ export default function Properties() {
   const addProperty = async () => {
     if (!form.name) return;
     try {
+      setSavingAdd(true);
       const newProp = await createProperty({
         name: form.name!,
         address1: form.address1 ?? "",
@@ -53,8 +59,11 @@ export default function Properties() {
       });
       setProperties((prev) => [newProp, ...prev]);
       setForm({ property_type: "single" });
+      setAddModalOpen(false);
     } catch (err) {
       console.error("Error adding property:", err);
+    } finally {
+      setSavingAdd(false);
     }
   };
 
@@ -122,67 +131,88 @@ export default function Properties() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Properties</h1>
-        <button onClick={addProperty} className="pm-btn">
+        <button className="pm-btn" onClick={() => setAddModalOpen(true)}>
           + Add Property
         </button>
       </div>
 
-      {/* Add form */}
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        <input
-          id="property-name"
-          data-testid="property-name"
-          className="pm-input"
-          placeholder="Name"
-          value={form.name ?? ""}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-        />
-        <input
-          id="property-address"
-          data-testid="property-address"
-          className="pm-input"
-          placeholder="Address"
-          value={form.address1 ?? ""}
-          onChange={(e) => setForm({ ...form, address1: e.target.value })}
-        />
-        <input
-          id="property-city"
-          data-testid="property-city"
-          className="pm-input"
-          placeholder="City"
-          value={form.city ?? ""}
-          onChange={(e) => setForm({ ...form, city: e.target.value })}
-        />
-        <input
-          id="property-state"
-          data-testid="property-state"
-          className="pm-input"
-          placeholder="State"
-          value={form.state ?? ""}
-          onChange={(e) => setForm({ ...form, state: e.target.value })}
-        />
-        <input
-          id="property-postal"
-          data-testid="property-postal"
-          className="pm-input"
-          placeholder="Postal Code"
-          value={form.postal_code ?? ""}
-          onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
-        />
-        <div className="flex items-center gap-3">
-          <label className="text-sm text-slate-700" htmlFor="property-type">Property type:</label>
-          <select
-            id="property-type"
-            data-testid="property-type"
-            className="pm-input"
-            value={form.property_type ?? "single"}
-            onChange={(e) => setForm({ ...form, property_type: e.target.value as "single" | "multi" })}
-          >
-            <option value="single">Single-family</option>
-            <option value="multi">Multi-unit</option>
-          </select>
+      {/* Add Property Modal */}
+      {addModalOpen && (
+        <div className="fixed inset-0 z-20 grid place-items-center bg-black/40" onClick={() => setAddModalOpen(false)}>
+          <div className="pm-card w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold mb-3">Add Property</h2>
+            <div className="grid gap-2 sm:grid-cols-2">
+              <input
+                id="add-property-name"
+                data-testid="add-property-name"
+                className="pm-input"
+                placeholder="Name"
+                value={form.name ?? ""}
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
+              <select
+                id="add-property-type"
+                data-testid="add-property-type"
+                className="pm-input"
+                value={form.property_type ?? "single"}
+                onChange={(e) => setForm({ ...form, property_type: e.target.value as "single" | "multi" })}
+              >
+                <option value="single">Single-family</option>
+                <option value="multi">Multi-unit</option>
+              </select>
+              <input
+                id="add-property-address"
+                data-testid="add-property-address"
+                className="pm-input"
+                placeholder="Address"
+                value={form.address1 ?? ""}
+                onChange={(e) => setForm({ ...form, address1: e.target.value })}
+              />
+              <input
+                id="add-property-city"
+                data-testid="add-property-city"
+                className="pm-input"
+                placeholder="City"
+                value={form.city ?? ""}
+                onChange={(e) => setForm({ ...form, city: e.target.value })}
+              />
+              <input
+                id="add-property-state"
+                data-testid="add-property-state"
+                className="pm-input"
+                placeholder="State"
+                value={form.state ?? ""}
+                onChange={(e) => setForm({ ...form, state: e.target.value })}
+              />
+              <input
+                id="add-property-postal"
+                data-testid="add-property-postal"
+                className="pm-input"
+                placeholder="Postal Code"
+                value={form.postal_code ?? ""}
+                onChange={(e) => setForm({ ...form, postal_code: e.target.value })}
+              />
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="pm-btn"
+                data-testid="add-property-save"
+                onClick={addProperty}
+                disabled={savingAdd || !form.name?.trim()}
+              >
+                {savingAdd ? "Saving..." : "Save"}
+              </button>
+              <button
+                className="px-3 py-2 rounded border"
+                data-testid="add-property-cancel"
+                onClick={() => { setAddModalOpen(false); setForm({ property_type: "single" }); }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Table */}
       {loading ? (

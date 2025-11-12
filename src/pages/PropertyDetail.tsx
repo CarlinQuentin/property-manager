@@ -14,6 +14,7 @@ export default function PropertyDetail() {
   const [units, setUnits] = useState<Unit[]>([]);
   const [loading, setLoading] = useState(true);
   const [form, setForm] = useState<Partial<Unit>>({ label: "" });
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null); // 👈 NEW
 
@@ -61,6 +62,7 @@ export default function PropertyDetail() {
       });
       setUnits((prev) => [...prev, newUnit].sort((a, b) => a.label.localeCompare(b.label)));
       setForm({ label: "" });
+      setAddModalOpen(false);
     } catch (e) {
       console.error("Failed to add unit:", e);
     } finally {
@@ -141,164 +143,175 @@ export default function PropertyDetail() {
         <Link to="/properties" className="pm-btn">← Back</Link>
       </div>
 
-      {/* Units: add form */}
+      {/* Units section */}
       <div className="pm-card">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold">Units</h2>
-        </div>
-
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-          <input
-            id="unit-label"
-            data-testid="unit-label"
-            className="pm-input"
-            placeholder='Label (e.g., "Single Family Home", "Unit A")'
-            value={form.label ?? ""}
-            onChange={(e) => setForm({ ...form, label: e.target.value })}
-          />
-          <input
-            id="unit-bedrooms"
-            data-testid="unit-bedrooms"
-            className="pm-input"
-            type="number"
-            placeholder="Bedrooms"
-            value={form.bedrooms ?? ""}
-            onChange={(e) => setForm({ ...form, bedrooms: e.target.value ? Number(e.target.value) : undefined })}
-          />
-          <input
-            id="unit-bathrooms"
-            data-testid="unit-bathrooms"
-            className="pm-input"
-            type="number"
-            step="0.5"
-            placeholder="Bathrooms"
-            value={form.bathrooms ?? ""}
-            onChange={(e) => setForm({ ...form, bathrooms: e.target.value ? Number(e.target.value) : undefined })}
-          />
-          <input
-            id="unit-sqft"
-            data-testid="unit-sqft"
-            className="pm-input"
-            type="number"
-            placeholder="Sq Ft"
-            value={form.sqft ?? ""}
-            onChange={(e) => setForm({ ...form, sqft: e.target.value ? Number(e.target.value) : undefined })}
-          />
-        </div>
-
-        <div className="mt-3">
-          <label className="inline-flex items-center gap-2 text-sm" htmlFor="unit-default">
-            <input
-              id="unit-default"
-              data-testid="unit-default"
-              type="checkbox"
-              checked={Boolean(form.is_default)}
-              onChange={(e) => setForm({ ...form, is_default: e.target.checked })}
-            />
-            Mark as default unit
-          </label>
-        </div>
-
-        <div className="mt-3">
-          <button className="pm-btn" onClick={addUnit} disabled={saving || !form.label?.trim()}>
-            {saving ? "Adding..." : "+ Add Unit"}
+          <button className="pm-btn" onClick={() => setAddModalOpen(true)}>
+            + Add Unit
           </button>
         </div>
-      </div>
 
-      {/* Units table */}
-      <div className="pm-card overflow-auto">
-        {units.length === 0 ? (
-          <p className="text-slate-600 italic">No units yet.</p>
-        ) : (
-          <table className="min-w-full border-collapse">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left p-2">Label</th>
-                <th className="text-left p-2">Beds</th>
-                <th className="text-left p-2">Baths</th>
-                <th className="text-left p-2">Sq Ft</th>
-                <th className="text-left p-2">Default</th>
-                <th className="text-right p-2 w-10"> </th>
-              </tr>
-            </thead>
-            <tbody>
-              {units.sort((a, b) => a.label.localeCompare(b.label)).map((u) => (
-                <tr key={u.id} className="border-b hover:bg-slate-50">
-                  <td className="p-2">{u.label}</td>
-                  <td className="p-2">{u.bedrooms ?? ""}</td>
-                  <td className="p-2">{u.bathrooms ?? ""}</td>
-                  <td className="p-2">{u.sqft ?? ""}</td>
-                  <td className="p-2">{u.is_default ? "Yes" : ""}</td>
-                  <td className="p-2 text-right" onClick={(e) => e.stopPropagation()}>
-                    <div className="relative inline-block text-left">
-                      <button
-                        className="rounded p-1 hover:bg-slate-200"
-                        aria-label="More"
-                        onClick={(e) => openMenu(e, u.id as string)}
-                      >
-                        <span className="inline-block w-5 text-center">⋯</span>
-                      </button>
-                      <PortalMenu
-                        open={openMenuId === u.id}
-                        anchorEl={anchorEl}
-                        onClose={() => setOpenMenuId(null)}
-                        minWidth={128}
-                      >
-                        <button
-                          className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50"
-                          onClick={(e) => onChooseEdit(e, u)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
-                          onClick={(e) => onChooseDelete(e, u)}
-                        >
-                          Delete
-                        </button>
-                      </PortalMenu>
-                    </div>
-                  </td>
+        {/* Units list */}
+        <div className="overflow-auto mb-4">
+          {units.length === 0 ? (
+            <p className="text-slate-600 italic">No units yet.</p>
+          ) : (
+            <table className="min-w-full border-collapse">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left p-2">Label</th>
+                  <th className="text-left p-2">Bedrooms</th>
+                  <th className="text-left p-2">Bathrooms</th>
+                  <th className="text-left p-2">Sq Ft</th>
+                  <th className="text-left p-2">Default</th>
+                  <th className="text-right p-2 w-10"> </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+              </thead>
+              <tbody>
+                {units.map((u) => (
+                  <tr key={u.id} className="border-b">
+                    <td className="p-2 font-medium">{u.label}</td>
+                    <td className="p-2">{u.bedrooms ?? ""}</td>
+                    <td className="p-2">{u.bathrooms ?? ""}</td>
+                    <td className="p-2">{u.sqft ?? ""}</td>
+                    <td className="p-2">{u.is_default ? <span className="text-green-600 font-bold">Default</span> : ""}</td>
+                    <td className="p-2 text-right">
+                      <div className="relative inline-block text-left">
+                        <button
+                          className="rounded p-1 hover:bg-slate-200"
+                          aria-label="More"
+                          onClick={(e) => openMenu(e, u.id as string)}
+                        >
+                          <span className="inline-block w-5 text-center">⋯</span>
+                        </button>
+                        <PortalMenu
+                          open={openMenuId === u.id}
+                          anchorEl={anchorEl}
+                          onClose={() => setOpenMenuId(null)}
+                          minWidth={128}
+                        >
+                          <button
+                            className="w-full text-left px-3 py-2 text-sm hover:bg-slate-50"
+                            onClick={(e) => onChooseEdit(e, u)}
+                          >
+                            Edit
+                          </button>
+                          <button
+                            className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50"
+                            onClick={(e) => onChooseDelete(e, u)}
+                          >
+                            Delete
+                          </button>
+                        </PortalMenu>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
       </div>
 
-      {/* Edit modal */}
+      {/* Add Unit Modal */}
+      {addModalOpen && (
+        <div className="fixed inset-0 z-20 grid place-items-center bg-black/40" onClick={() => { setAddModalOpen(false); setForm({ label: "" }); }}>
+          <div className="pm-card w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold mb-3">Add Unit</h2>
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+              <input
+                id="add-unit-label"
+                data-testid="add-unit-label"
+                className="pm-input"
+                placeholder='Label (e.g., "Single Family Home", "Unit A")'
+                value={form.label ?? ""}
+                onChange={(e) => setForm({ ...form, label: e.target.value })}
+              />
+              <input
+                id="add-unit-bedrooms"
+                data-testid="add-unit-bedrooms"
+                className="pm-input"
+                type="number"
+                placeholder="Bedrooms"
+                value={form.bedrooms ?? ""}
+                onChange={(e) => setForm({ ...form, bedrooms: e.target.value ? Number(e.target.value) : undefined })}
+              />
+              <input
+                id="add-unit-bathrooms"
+                data-testid="add-unit-bathrooms"
+                className="pm-input"
+                type="number"
+                step="0.5"
+                placeholder="Bathrooms"
+                value={form.bathrooms ?? ""}
+                onChange={(e) => setForm({ ...form, bathrooms: e.target.value ? Number(e.target.value) : undefined })}
+              />
+              <input
+                id="add-unit-sqft"
+                data-testid="add-unit-sqft"
+                className="pm-input"
+                type="number"
+                placeholder="Sq Ft"
+                value={form.sqft ?? ""}
+                onChange={(e) => setForm({ ...form, sqft: e.target.value ? Number(e.target.value) : undefined })}
+              />
+            </div>
+            <div className="mt-3">
+              <label className="inline-flex items-center gap-2 text-sm" htmlFor="add-unit-default">
+                <input
+                  id="add-unit-default"
+                  data-testid="add-unit-default"
+                  type="checkbox"
+                  checked={Boolean(form.is_default)}
+                  onChange={(e) => setForm({ ...form, is_default: e.target.checked })}
+                />
+                Mark as default unit
+              </label>
+            </div>
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="pm-btn"
+                data-testid="add-unit-save"
+                onClick={addUnit}
+                disabled={saving || !form.label?.trim()}
+              >
+                {saving ? "Adding..." : "Save"}
+              </button>
+              <button
+                className="px-3 py-2 rounded border"
+                data-testid="add-unit-cancel"
+                onClick={() => { setAddModalOpen(false); setForm({ label: "" }); }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Unit Modal */}
       {editing && (
         <div className="fixed inset-0 z-20 grid place-items-center bg-black/40" onClick={() => setEditing(null)}>
-          <div className="pm-card w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+          <div className="pm-card w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
             <h2 className="text-lg font-semibold mb-3">Edit Unit</h2>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
               <input
                 id="edit-unit-label"
                 data-testid="edit-unit-label"
                 className="pm-input"
-                placeholder="Label"
-                value={editing.label ?? ""}
-                onChange={(e) => setEditing({ ...editing, label: e.target.value })}
+                placeholder='Label (e.g., "Single Family Home", "Unit A")'
+                value={editing?.label ?? ""}
+                onChange={(e) => editing && setEditing({ ...editing, label: e.target.value })}
               />
-              <label className="inline-flex items-center gap-2 px-2" htmlFor="edit-unit-default">
-                <input
-                  id="edit-unit-default"
-                  data-testid="edit-unit-default"
-                  type="checkbox"
-                  checked={Boolean(editing.is_default)}
-                  onChange={(e) => setEditing({ ...editing, is_default: e.target.checked })}
-                />
-                Default unit
-              </label>
               <input
                 id="edit-unit-bedrooms"
                 data-testid="edit-unit-bedrooms"
                 className="pm-input"
                 type="number"
                 placeholder="Bedrooms"
-                value={editing.bedrooms ?? ""}
-                onChange={(e) => setEditing({ ...editing, bedrooms: e.target.value ? Number(e.target.value) : null })}
+                value={editing?.bedrooms ?? ""}
+                onChange={(e) => editing && setEditing({ ...editing, bedrooms: e.target.value ? Number(e.target.value) : null })}
               />
               <input
                 id="edit-unit-bathrooms"
@@ -307,8 +320,8 @@ export default function PropertyDetail() {
                 type="number"
                 step="0.5"
                 placeholder="Bathrooms"
-                value={editing.bathrooms ?? ""}
-                onChange={(e) => setEditing({ ...editing, bathrooms: e.target.value ? Number(e.target.value) : null })}
+                value={editing?.bathrooms ?? ""}
+                onChange={(e) => editing && setEditing({ ...editing, bathrooms: e.target.value ? Number(e.target.value) : null })}
               />
               <input
                 id="edit-unit-sqft"
@@ -316,13 +329,24 @@ export default function PropertyDetail() {
                 className="pm-input"
                 type="number"
                 placeholder="Sq Ft"
-                value={editing.sqft ?? ""}
-                onChange={(e) => setEditing({ ...editing, sqft: e.target.value ? Number(e.target.value) : null })}
+                value={editing?.sqft ?? ""}
+                onChange={(e) => editing && setEditing({ ...editing, sqft: e.target.value ? Number(e.target.value) : null })}
               />
             </div>
-
+            <div className="mt-3">
+              <label className="inline-flex items-center gap-2 text-sm" htmlFor="edit-unit-default">
+                <input
+                  id="edit-unit-default"
+                  data-testid="edit-unit-default"
+                  type="checkbox"
+                  checked={Boolean(editing?.is_default)}
+                  onChange={(e) => editing && setEditing({ ...editing, is_default: e.target.checked })}
+                />
+                Mark as default unit
+              </label>
+            </div>
             <div className="mt-4 flex justify-end gap-2">
-              <button className="pm-btn" onClick={saveEdit} disabled={savingEdit || !editing.label?.trim()}>
+              <button className="pm-btn" onClick={saveEdit} disabled={savingEdit || !editing?.label?.trim()}>
                 {savingEdit ? "Saving..." : "Save"}
               </button>
               <button className="px-3 py-2 rounded border" onClick={() => setEditing(null)}>

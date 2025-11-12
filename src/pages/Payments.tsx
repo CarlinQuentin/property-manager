@@ -24,6 +24,7 @@ export default function Payments() {
   const [savingEdit, setSavingEdit] = useState(false);
 
   const today = new Date().toISOString().slice(0, 10);
+  // Modal state for add payment
   const [form, setForm] = useState<{
     lease_id?: string;
     paid_on: string;
@@ -31,6 +32,8 @@ export default function Payments() {
     method: Payment["method"];
     memo?: string;
   }>({ paid_on: today, method: "ach" });
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [savingAdd, setSavingAdd] = useState(false);
 
   const money = (cents: number) => `$${(cents / 100).toFixed(2)}`;
 
@@ -58,7 +61,7 @@ export default function Payments() {
   async function addPayment() {
     if (!canSave) return;
     try {
-      setSaving(true);
+      setSavingAdd(true);
       const amount_cents = Math.round(Number(form.amount_dollars) * 100);
       const newPayment = await createPayment({
         lease_id: form.lease_id!,
@@ -69,10 +72,11 @@ export default function Payments() {
       });
       setPayments((prev) => [newPayment, ...prev]);
       setForm((f) => ({ ...f, amount_dollars: "", memo: "" }));
+      setAddModalOpen(false);
     } catch (e) {
       console.error("Failed to add payment:", e);
     } finally {
-      setSaving(false);
+      setSavingAdd(false);
     }
   }
 
@@ -131,74 +135,96 @@ export default function Payments() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Payments</h1>
-        <button className="pm-btn" onClick={addPayment} disabled={!canSave || saving}>
-          {saving ? "Saving..." : "+ Record Payment"}
+        <button className="pm-btn" onClick={() => setAddModalOpen(true)}>
+          + Record Payment
         </button>
       </div>
 
-      {/* Form */}
-      <div className="pm-card space-y-3">
-        <div className="grid gap-2 sm:grid-cols-4">
-          <select
-            id="payment-lease"
-            data-testid="payment-lease"
-            className="pm-input"
-            value={form.lease_id ?? ""}
-            onChange={(e) => setForm({ ...form, lease_id: e.target.value })}
-          >
-            <option value="">Select lease…</option>
-            {leases.map((l) => (
-              <option key={l.id} value={l.id}>
-                {l.unit?.property?.name ?? "Property"} • {l.unit?.label ?? "Unit"} — {l.tenant?.first_name} {" "}
-                {l.tenant?.last_name}
-              </option>
-            ))}
-          </select>
+      {/* Add Payment Modal */}
+      {addModalOpen && (
+        <div className="fixed inset-0 z-20 grid place-items-center bg-black/40" onClick={() => setAddModalOpen(false)}>
+          <div className="pm-card w-full max-w-2xl" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-lg font-semibold mb-3">Add Payment</h2>
+            <div className="grid gap-2 sm:grid-cols-4">
+              <select
+                id="add-payment-lease"
+                data-testid="add-payment-lease"
+                className="pm-input"
+                value={form.lease_id ?? ""}
+                onChange={(e) => setForm({ ...form, lease_id: e.target.value })}
+              >
+                <option value="">Select lease…</option>
+                {leases.map((l) => (
+                  <option key={l.id} value={l.id}>
+                    {l.unit?.property?.name ?? "Property"} • {l.unit?.label ?? "Unit"} — {l.tenant?.first_name} {" "}
+                    {l.tenant?.last_name}
+                  </option>
+                ))}
+              </select>
 
-          <input
-            id="payment-date"
-            data-testid="payment-date"
-            className="pm-input"
-            type="date"
-            value={form.paid_on}
-            onChange={(e) => setForm({ ...form, paid_on: e.target.value })}
-          />
+              <input
+                id="add-payment-date"
+                data-testid="add-payment-date"
+                className="pm-input"
+                type="date"
+                value={form.paid_on}
+                onChange={(e) => setForm({ ...form, paid_on: e.target.value })}
+              />
 
-          <input
-            id="payment-amount"
-            data-testid="payment-amount"
-            className="pm-input"
-            type="number"
-            inputMode="decimal"
-            placeholder="Amount (dollars)"
-            value={form.amount_dollars ?? ""}
-            onChange={(e) => setForm({ ...form, amount_dollars: e.target.value })}
-          />
+              <input
+                id="add-payment-amount"
+                data-testid="add-payment-amount"
+                className="pm-input"
+                type="number"
+                inputMode="decimal"
+                placeholder="Amount (dollars)"
+                value={form.amount_dollars ?? ""}
+                onChange={(e) => setForm({ ...form, amount_dollars: e.target.value })}
+              />
 
-          <select
-            id="payment-method"
-            data-testid="payment-method"
-            className="pm-input"
-            value={form.method}
-            onChange={(e) => setForm({ ...form, method: e.target.value as Payment["method"] })}
-          >
-            {(["cash", "check", "ach", "card", "other"] as const).map((m) => (
-              <option key={m} value={m}>
-                {m.toUpperCase()}
-              </option>
-            ))}
-          </select>
+              <select
+                id="add-payment-method"
+                data-testid="add-payment-method"
+                className="pm-input"
+                value={form.method}
+                onChange={(e) => setForm({ ...form, method: e.target.value as Payment["method"] })}
+              >
+                {(["cash", "check", "ach", "card", "other"] as const).map((m) => (
+                  <option key={m} value={m}>
+                    {m.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <input
+              id="add-payment-memo"
+              data-testid="add-payment-memo"
+              className="pm-input w-full"
+              placeholder="Memo (optional)"
+              value={form.memo ?? ""}
+              onChange={(e) => setForm({ ...form, memo: e.target.value })}
+            />
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                className="pm-btn"
+                data-testid="add-payment-save"
+                onClick={addPayment}
+                disabled={savingAdd || !canSave}
+              >
+                {savingAdd ? "Saving..." : "Save"}
+              </button>
+              <button
+                className="px-3 py-2 rounded border"
+                data-testid="add-payment-cancel"
+                onClick={() => { setAddModalOpen(false); setForm({ paid_on: today, method: "ach" }); }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
-
-        <input
-          id="payment-memo"
-          data-testid="payment-memo"
-          className="pm-input w-full"
-          placeholder="Memo (optional)"
-          value={form.memo ?? ""}
-          onChange={(e) => setForm({ ...form, memo: e.target.value })}
-        />
-      </div>
+      )}
 
       {/* List */}
       <div className="pm-card overflow-auto">
